@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>URL Shortener</title>
+  </head>
+  <body
+    class="flex min-h-screen flex-col items-center justify-center bg-gray-100"
+  >
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold">DontClick.xyz</h1>
+      <h2 class="text-lg">
+        Shorten your long URL so your friends want to click it.
+      </h2>
+    </div>
+    <div class="w-96 rounded-lg bg-white p-8 shadow-md">
+      <!-- show shortened url here -->
+      {{if .URL}}
+      <p class="text-lg font-semibold">Shortened URL:</p>
+      <a href="{{.URL}}" target="_blank" class="text-blue-500 hover:underline"
+        >{{.URL}}</a
+      >
+      {{else}}
+      <!-- You can add any additional content or message if there's no URL submitted -->
+      {{end}}
+    </div>
+  </body>
+</html>
