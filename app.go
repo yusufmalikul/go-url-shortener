@@ -5,7 +5,6 @@ import (
 	"crypto/sha1"
 	"embed"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"html/template"
@@ -138,12 +137,11 @@ func shortenURL(longURL string) string {
 
 func main() {
 
-	// Define flags
-	var DB_URL string
-
-	flag.StringVar(&DB_URL, "db_url", "", "Postgres Database URL")
-
-	flag.Parse()
+	// Define env
+	DB_URL := os.Getenv("DB_URL")
+	if len(DB_URL) == 0 {
+		log.Fatal("Please set DB_URL env")
+	}
 
 	// Connect to the database
 	var err error
@@ -154,7 +152,7 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	slog.Info("Connected to DB", "db", DB_URL)
+	slog.Info("Connected to DB")
 
 	// Set up HTTP server
 	port := os.Getenv("PORT")
