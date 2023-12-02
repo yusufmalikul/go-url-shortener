@@ -7,21 +7,35 @@
     <title>URL Shortener</title>
   </head>
   <body
-    class="flex min-h-screen flex-col items-center justify-center bg-gray-100"
+    class="flex min-h-screen flex-col items-center justify-center bg-gray-200"
   >
-    <div class="mb-8 text-center">
-      <h1 class="text-4xl font-bold">DontClick.xyz</h1>
-      <h2 class="text-lg">
+    <div class="mb-8 p-2 text-center">
+      <h1 class="text-5xl font-bold md:text-6xl">
+        <span class="text-blue-500">DontClick</span>
+      </h1>
+      <h2 class="text-2xl text-gray-800">
         Shorten your long URL so your friends want to click it.
       </h2>
     </div>
-    <div class="w-96 rounded-lg bg-white p-8 shadow-md">
+    <div class="w-full rounded-lg bg-white p-8 shadow-md md:w-3/5">
       <!-- show shortened url here -->
       {{if .URL}}
-      <p class="text-lg font-semibold">Shortened URL:</p>
-      <a href="{{.URL}}" target="_blank" class="text-blue-500 hover:underline"
+      <p class="mb-4 text-2xl font-bold">Shortened URL:</p>
+      <a
+        href="{{.URL}}"
+        target="_blank"
+        class="text-xl text-blue-500 hover:underline"
         >{{.URL}}</a
       >
+      <br />
+      <button
+        class="mt-4 rounded-full border-2 border-gray-300 bg-blue-500 p-2 px-8 text-white hover:bg-blue-600 focus:border-blue-300 focus:outline-none focus:ring"
+      >
+        Copy
+      </button>
+      <button class="rounded-full border-2 border-gray-300 p-2 px-8">
+        <a href="/">Shorten another URL</a>
+      </button>
       {{else}}
       <!-- You can add any additional content or message if there's no URL submitted -->
       {{end}}
