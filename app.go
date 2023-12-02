@@ -35,7 +35,7 @@ var baseURL string
 func trackUserAgent(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userAgent := r.Header.Get("User-Agent")
-		slog.Info("New visitor", "IP", r.RemoteAddr, "userAgent", userAgent)
+		slog.Info("New visitor", "IP", getClientIP(r), "userAgent", userAgent)
 
 		// Call the next handler in the chain
 		next(w, r)
@@ -64,19 +64,13 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 		// Shorten the URL
 		shortURL := shortenURL(originalURL)
 
-		ip, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil {
-			fmt.Println("Error extracting IP:", err)
-			return
-		}
-
 		// Insert to DB
-		err = insertShortURL(originalURL, shortURL, ip, r.Header.Get("User-Agent"))
+		err = insertShortURL(originalURL, shortURL, getClientIP(r), r.Header.Get("User-Agent"))
 		if err != nil {
 			log.Fatalf("Error inserting data into 'short_urls' table: %v\n", err)
 		}
 
-		message := "New short URL from " + r.RemoteAddr + " " + r.Header.Get("User-Agent")
+		message := "New short URL from " + getClientIP(r) + " " + r.Header.Get("User-Agent")
 		pushNotif(message)
 
 		// Render the HTML template with the URL
@@ -116,7 +110,7 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := "New visit from " + r.RemoteAddr + " " + r.Header.Get("User-Agent")
+	message := "New visit from " + getClientIP(r) + " " + r.Header.Get("User-Agent")
 	pushNotif(message)
 
 	// Render the HTML form
@@ -255,4 +249,13 @@ func pushNotif(message string) {
 		return
 	}
 	defer resp.Body.Close()
+}
+
+func getClientIP(r *http.Request) string {
+	clientIP := r.Header.Get("X-FORWARDED-FOR")
+	if clientIP != "" {
+		return clientIP
+	}
+
+	return r.RemoteAddr
 }
