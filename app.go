@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha1"
 	"embed"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"html/template"
@@ -24,6 +26,9 @@ var t = template.Must(template.ParseFS(resources, "templates/*"))
 
 var conn *pgx.Conn
 
+var pushoverToken string
+var pushoverUser string
+
 // Middleware to track User-Agent
 func trackUserAgent(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +42,7 @@ func trackUserAgent(next http.HandlerFunc) http.HandlerFunc {
 
 // Handle the URL shortening logic
 func handleShortenURL(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == http.MethodPost {
 		// Parse form data
 		err := r.ParseForm()
@@ -67,6 +73,9 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalf("Error inserting data into 'short_urls' table: %v\n", err)
 		}
+
+		message := "New short URL from " + r.RemoteAddr + " " + r.Header.Get("User-Agent")
+		pushNotif(message)
 
 		// Render the HTML template with the URL
 		data := map[string]string{
@@ -105,6 +114,9 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	message := "New visit from " + r.RemoteAddr + " " + r.Header.Get("User-Agent")
+	pushNotif(message)
+
 	// Render the HTML form
 	t.ExecuteTemplate(w, "index.html", nil)
 }
@@ -142,6 +154,9 @@ func main() {
 	if len(DB_URL) == 0 {
 		log.Fatal("Please set DB_URL env")
 	}
+
+	pushoverToken = os.Getenv("PUSHOVER_TOKEN")
+	pushoverUser = os.Getenv("PUSHOVER_USER")
 
 	// Connect to the database
 	var err error
@@ -210,4 +225,30 @@ func increaseHits(shortURL string) error {
 
 	slog.Info("Hits increased for short URL", "short_url", shortURL)
 	return nil
+}
+
+func pushNotif(message string) {
+
+	slog.Info("send push")
+
+	// Construct the request payload
+	payload := map[string]string{
+		"token":   pushoverToken,
+		"user":    pushoverUser,
+		"message": message,
+	}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	// Make the POST request to Pushover API
+	pushoverURL := "https://api.pushover.net/1/messages.json"
+	resp, err := http.Post(pushoverURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer resp.Body.Close()
 }
