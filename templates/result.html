@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
     <title>URL Shortener</title>
   </head>
   <body
@@ -25,10 +26,13 @@
         href="{{.URL}}"
         target="_blank"
         class="text-xl text-blue-500 hover:underline"
+        id="shortURL"
         >{{.URL}}</a
       >
       <br />
       <button
+        id="copyBtn"
+        data-clipboard-target="#shortURL"
         class="mt-4 rounded-full border-2 border-gray-300 bg-blue-500 p-2 px-8 text-white hover:bg-blue-600 focus:border-blue-300 focus:outline-none focus:ring"
       >
         Copy
@@ -40,5 +44,14 @@
       <!-- You can add any additional content or message if there's no URL submitted -->
       {{end}}
     </div>
+    <script>
+      var clipboard = new ClipboardJS("#copyBtn");
+      var copyBtn = document.getElementById("copyBtn");
+
+      clipboard.on("success", function (e) {
+        copyBtn.textContent = "Copied";
+        // e.clearSelection();
+      });
+    </script>
   </body>
 </html>
