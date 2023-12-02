@@ -29,6 +29,8 @@ var conn *pgx.Conn
 var pushoverToken string
 var pushoverUser string
 
+var baseURL string
+
 // Middleware to track User-Agent
 func trackUserAgent(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +81,7 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 
 		// Render the HTML template with the URL
 		data := map[string]string{
-			"URL": fmt.Sprintf("https://dontclick.xyz/%s", shortURL),
+			"URL": fmt.Sprintf("%s/%s", baseURL, shortURL),
 		}
 
 		t.ExecuteTemplate(w, "result.html", data)
@@ -157,6 +159,8 @@ func main() {
 
 	pushoverToken = os.Getenv("PUSHOVER_TOKEN")
 	pushoverUser = os.Getenv("PUSHOVER_USER")
+
+	baseURL = os.Getenv("BASE_URL")
 
 	// Connect to the database
 	var err error
