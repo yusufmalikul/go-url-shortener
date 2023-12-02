@@ -1,3 +1,2 @@
-# dontclick.xyz URL Shortener
-
-Simple and fast URL shortener
+# go-url-shortener
+URL Shortener using Go
