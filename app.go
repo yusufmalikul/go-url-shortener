@@ -109,8 +109,8 @@ func handleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := "New visit from " + getClientIP(r) + " " + r.Header.Get("User-Agent")
-	pushNotif(message)
+	// message := "New visit from " + getClientIP(r) + " " + r.Header.Get("User-Agent")
+	// pushNotif(message)
 
 	// Render the HTML form
 	t.ExecuteTemplate(w, "index.html", nil)
